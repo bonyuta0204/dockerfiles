@@ -1,0 +1,33 @@
+name: Docker Image Build
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to main
+  pull_request:
+    branches:
+      - main  # Optionally, trigger on pull requests to main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [node-debug]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build and push Docker images
+      run: |
+        docker build -t bonyuta0204/${{ matrix.service }}:latest ./${{ matrix.service }}
+        docker push bonyuta0204/${{ matrix.service }}:latest
+
